@@ -3,6 +3,9 @@ from nltk.tokenize import sent_tokenize
 import regex
 import re
 
+import nltk
+nltk.download('punkt', quiet=True)
+
 ## LOAD EMOJICON
 file = open('stopwords/emojicon.txt', 'r', encoding="utf8")
 emoji_lst = file.read().split('\n')
