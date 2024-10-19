@@ -11,7 +11,10 @@ warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all domains
-nltk.download('punkt_tab')
+
+# Download the necessary NLTK resources
+nltk.download('punkt')
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
