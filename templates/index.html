@@ -8,43 +8,42 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<div class="container mt-5">
-    <h1 class="text-center">Phân Tích Tình Cảm</h1>
-    <form id="sentiment-form">
-        <div class="form-group">
-            <label for="comment">Nhập bình luận:</label>
-            <textarea id="comment" class="form-control" rows="4" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Gửi</button>
-    </form>
-    <div id="result" class="mt-4"></div>
-</div>
-
-<script>
-$(document).ready(function() {
-    $('#sentiment-form').on('submit', function(e) {
-        e.preventDefault();
-        const comment = $('#comment').val();
-
-        $.ajax({
-            type: 'POST',
-            url: '/api/predict',
-            contentType: 'application/json',
-            data: JSON.stringify({ comment }),  // Chỉ gửi bình luận
-            success: function(response) {
-                let resultHtml = '<h4>Kết quả phân tích:</h4>';
-                response.forEach(item => {
-                    resultHtml += `<p><strong>Bình luận:</strong> ${item.Comment}</p>`;
-                    resultHtml += `<p><strong>Nhận xét:</strong> ${item.Label}</p>`;
+    <div class="container mt-5">
+        <h1 class="text-center">Phân Tích Tình Cảm</h1>
+        <form id="sentiment-form">
+            <div class="form-group">
+                <label for="comment">Nhập bình luận:</label>
+                <textarea id="comment" class="form-control" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Gửi</button>
+        </form>
+        <div id="result" class="mt-4"></div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#sentiment-form').on('submit', function(e) {
+                e.preventDefault();
+                const comment = $('#comment').val();
+                $.ajax({
+                    type: 'POST',
+                    url: 'https://ptcs-1.onrender.com/api/predict',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ comment }),
+                    success: function(response) {
+                        let resultHtml = '<h4>Kết quả phân tích:</h4>';
+                        response.forEach(item => {
+                            resultHtml += `<p><strong>Bình luận:</strong> ${item.Comment}</p>`;
+                            resultHtml += `<p><strong>Nhận xét:</strong> ${item.Label}</p>`;
+                        });
+                        $('#result').html(resultHtml);
+                    },
+                    error: function(xhr) {
+                        const errorMessage = xhr.responseJSON ? xhr.responseJSON.error : 'Lỗi không xác định';
+                        $('#result').html('<p class="text-danger">Có lỗi xảy ra: ' + errorMessage + '</p>');
+                    }
                 });
-                $('#result').html(resultHtml);
-            },
-            error: function(xhr) {
-                $('#result').html('<p class="text-danger">Có lỗi xảy ra: ' + xhr.responseJSON.error + '</p>');
-            }
+            });
         });
-    });
-});
-</script>
+    </script>
 </body>
 </html>
