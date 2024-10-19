@@ -5,17 +5,13 @@ import nltk
 import pandas as pd
 import logging
 import warnings
-from helpers import vn_processing as xt  # Assuming vn_processing contains stepByStep
+from helpers import vn_processing as xt  # Assuming vn_processing contains the stepByStep function
 
 warnings.filterwarnings('ignore')
 
-# Initialize Flask app and enable CORS
 app = Flask(__name__)
-CORS(app)
-
-# Download the required NLTK resource
-nltk.download('punkt')
-
+CORS(app)  # Enable CORS for all domains
+nltk.download('punkt_tab')
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -46,12 +42,10 @@ def predict_sentiment(text):
     })
     return df[['Comment', 'Label']].to_dict(orient='records')
 
-# Route to render the index page
 @app.route('/')
 def index():
     return render_template('index.html', result=None)
 
-# Route to handle sentiment prediction
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
@@ -63,15 +57,46 @@ def predict():
 
         result = predict_sentiment([text])
         return jsonify(result)
-
-    except KeyError as e:
-        logging.error(f"KeyError: {e}")
-        return jsonify({'error': 'Invalid input format'}), 400
-
+    except KeyError:
+        return jsonify({'error': 'Missing required parameter'}), 400
     except Exception as e:
-        logging.error(f"Exception: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
+        logging.error(f"Error during prediction: {e}")
+        return jsonify({'error': str(e)}), 500  # Use 500 for unexpected errors
 
-# Run the Flask app
+# Define API endpoint for prediction
+@app.route('/api/predict', methods=['POST'])
+def api_predict():
+    """
+    Sentiment analysis API
+    ---
+    parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            comment:
+              type: string
+              description: The comment text for sentiment analysis
+    responses:
+      200:
+        description: Sentiment analysis result
+      400:
+        description: Bad request
+    """
+    try:
+        data = request.json
+        comment = data.get('comment')
+
+        if not comment:  # Check if comment is missing
+            return jsonify({'error': 'Empty comment provided'}), 400
+
+        predictions = predict_sentiment([comment])
+        return jsonify(predictions)
+    except Exception as e:
+        logging.error(f"Error during API prediction: {e}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
