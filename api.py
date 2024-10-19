@@ -5,14 +5,15 @@ import nltk
 import pandas as pd
 import logging
 import warnings
-from helpers import vn_processing as xt  # Assuming vn_processing contains the stepByStep function
+from helpers import vn_processing as xt  # Assuming vn_processing contains stepByStep
 
 warnings.filterwarnings('ignore')
 
+# Initialize Flask app and enable CORS
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all domains
+CORS(app)
 
-# Download the necessary NLTK resources
+# Download the required NLTK resource
 nltk.download('punkt')
 
 # Configure logging
@@ -45,10 +46,12 @@ def predict_sentiment(text):
     })
     return df[['Comment', 'Label']].to_dict(orient='records')
 
+# Route to render the index page
 @app.route('/')
 def index():
     return render_template('index.html', result=None)
 
+# Route to handle sentiment prediction
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
@@ -60,46 +63,15 @@ def predict():
 
         result = predict_sentiment([text])
         return jsonify(result)
-    except KeyError:
-        return jsonify({'error': 'Missing required parameter'}), 400
+
+    except KeyError as e:
+        logging.error(f"KeyError: {e}")
+        return jsonify({'error': 'Invalid input format'}), 400
+
     except Exception as e:
-        logging.error(f"Error during prediction: {e}")
-        return jsonify({'error': str(e)}), 500  # Use 500 for unexpected errors
+        logging.error(f"Exception: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
 
-# Define API endpoint for prediction
-@app.route('/api/predict', methods=['POST'])
-def api_predict():
-    """
-    Sentiment analysis API
-    ---
-    parameters:
-      - name: data
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            comment:
-              type: string
-              description: The comment text for sentiment analysis
-    responses:
-      200:
-        description: Sentiment analysis result
-      400:
-        description: Bad request
-    """
-    try:
-        data = request.json
-        comment = data.get('comment')
-
-        if not comment:  # Check if comment is missing
-            return jsonify({'error': 'Empty comment provided'}), 400
-
-        predictions = predict_sentiment([comment])
-        return jsonify(predictions)
-    except Exception as e:
-        logging.error(f"Error during API prediction: {e}")
-        return jsonify({'error': str(e)}), 500
-
+# Run the Flask app
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
