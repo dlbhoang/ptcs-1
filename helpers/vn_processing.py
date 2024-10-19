@@ -5,7 +5,7 @@ import re
 
 import nltk
 nltk.download('punkt', quiet=True)
-
+nltk.download('punkt_tab')
 ## LOAD EMOJICON
 file = open('stopwords/emojicon.txt', 'r', encoding="utf8")
 emoji_lst = file.read().split('\n')
