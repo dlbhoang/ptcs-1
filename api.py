@@ -11,10 +11,7 @@ warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all domains
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
+nltk.download('punkt_tab')
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
