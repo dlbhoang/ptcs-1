@@ -12,6 +12,7 @@ warnings.filterwarnings('ignore')
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all domains
 nltk.download('punkt_tab')
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -99,4 +100,4 @@ def api_predict():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)  # Bind to all interfaces
