@@ -7,11 +7,15 @@ import logging
 import warnings
 from helpers import vn_processing as xt  # Assuming vn_processing contains the stepByStep function
 
+# Suppress warnings
 warnings.filterwarnings('ignore')
 
+# Initialize Flask app and enable CORS
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all domains
-nltk.download('punkt_tab')
+CORS(app)
+
+# Download NLTK punkt tokenizer
+nltk.download('punkt')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -34,13 +38,9 @@ def predict_sentiment(text):
 
     # Map predictions to labels
     df['Label'] = y_pred
-    df['Label'] = df['Label'].map({
-        0: 'Tiêu cực',
-        1: 'Bình thường',
-        2: 'Tích cực',
-        3: 'Rất Tiêu cực',
-        4: 'Rất Tích cực'
-    })
+    inv_label_map = {0: 'Tiêu cực', 1: 'Bình thường', 2: 'Tích cực'}  # Ensure this matches your model output
+    df['Label'] = df['Label'].map(inv_label_map)
+    
     return df[['Comment', 'Label']].to_dict(orient='records')
 
 @app.route('/')
@@ -67,8 +67,7 @@ def predict():
 # Define API endpoint for prediction
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
-    """
-    Sentiment analysis API
+    """ Sentiment analysis API
     ---
     parameters:
       - name: data
